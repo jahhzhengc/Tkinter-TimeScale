@@ -27,40 +27,19 @@ class DateApp(tk.Tk):
 
 
 class StartPage(tk.Frame):
-     
-        # tk.Button(self, text="Start date",  command)
-
-    def open_calendar(self): 
-        self.calendar_window = tk.Toplevel(self)
-        self.calendar_window.title("Calendar")
-
-        self.startDateBtn["state"] = "disabled"
-        today = datetime.today()  
-        c = CalendarWidget.CalendarWidget(self.calendar_window, today=today, set_date_callback= self.update_button_text, relief="groove")
-        c.pack(padx=4, pady=4) 
-
-    def update_button_text(self, btn, selected_date:datetime):
-        self.open_calendar_button.config(text=selected_date.strftime("%Y-%m-%d"))
-        self.calendar_window.destroy()
-        self.calendar_window.update()
-        self.open_calendar_button["state"] = "normal"
-
     def __init__(self, master):
         super().__init__(master)
         
         self.calendar_window = None
-        
-        self.startDateBtn = tk.Button(self, text="Start Date", command= self.open_calendar)
-        self.startDateBtn.grid(row=0, column=1, padx=10, pady=10)
+        self.startBtnPressed = False
+        self.startDateBtn = tk.Button(self, text="Start Date", command= lambda: self.open_calendar(startBtnPressed=True))
 
+        self.startDateBtn.grid(row=0, column=0, padx=10, pady=10)
+        self.endDateBtn = tk.Button(self, text="End Date",command= lambda: self.open_calendar(startBtnPressed=False))
+        self.endDateBtn.grid(row=0, column=1, padx=10, pady=10)
 
-        # tk.Label(self, text="Start Date").grid(row=0, column=0, padx=10, pady=10)
-        # self.start_date_entry = DateEntry(self, date_pattern="yyyy-mm-dd")
-        # self.start_date_entry.grid(row=0, column=1, padx=10, pady=10)
-
-        tk.Label(self, text="End Date").grid(row=1, column=0, padx=10, pady=10)
-        self.end_date_entry = DateEntry(self, date_pattern="yyyy-mm-dd")
-        self.end_date_entry.grid(row=1, column=1, padx=10, pady=10)
+        self.start_date = None
+        self.end_date = None 
 
         tk.Label(self, text="Duration (minutes)").grid(row=2, column=0, padx=10, pady=10)
         self.duration_entry = tk.Entry(self)
@@ -68,16 +47,48 @@ class StartPage(tk.Frame):
 
         self.play_button = tk.Button(self, image= self.master.playBtn_Img, #text="Play", 
                                      command=self.start_countdown)
-        self.play_button.config(fg='red', bg ='blue')
+        self.play_button.config()
         self.play_button.grid(row=3, columnspan=2, pady=20)
 
+    def open_calendar(self, startBtnPressed:bool): 
+        if(self.calendar_window is not None):
+            return
+        
+        self.calendar_window = tk.Toplevel(self)
+        self.calendar_window.protocol("WM_DELETE_WINDOW", self.on_closing)
+       
+        self.startBtnPressed = startBtnPressed 
+        self.calendar_window.title("Pick start date" if startBtnPressed else "Pick end date")
+  
+        today = datetime.today()  
+        c = CalendarWidget.CalendarWidget(self.calendar_window, today=today, set_date_callback= self.update_button_text, relief="groove")
+        c.pack(padx=4, pady=4) 
+          
+    def on_closing(self):
+        self.calendar_window.destroy()
+        self.calendar_window.update()
+        self.calendar_window = None
+        
+    def update_button_text(self, selected_date:datetime):
+        if self.startBtnPressed: 
+            self.startDateBtn.config(text=selected_date.strftime("%Y-%m-%d"))
+            self.start_date = selected_date
+        else:
+            self.endDateBtn.config(text=selected_date.strftime("%Y-%m-%d"))
+            self.end_date = selected_date
+
+        self.on_closing()
+
+   
     def start_countdown(self):
-        self.master.start = time.time()
-        self.start_date = datetime.today()# datetime.strptime(self.start_date_entry.get(), "%Y-%m-%d")
-        self.end_date = datetime.strptime(self.end_date_entry.get(), "%Y-%m-%d")
+
+        
+        self.master.start = time.time() 
         duration = int(self.duration_entry.get()) * 60  # Convert to seconds
-        print(f"start date {self.start_date}, end date {self.end_date}")
+        # print(f"start date {self.start_date}, end date {self.end_date}")
         self.master.show_countdown_page(self.start_date, self.end_date, duration)
+
+
 class CountdownPage(tk.Frame):
     def __init__(self, master, start_date, end_date, duration):
         super().__init__(master)
