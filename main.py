@@ -3,6 +3,21 @@ from tkcalendar import DateEntry
 from datetime import datetime, timedelta 
 import time
 import CalendarWidget
+from nava import play
+import os
+import sys
+def resource_path(relative_path):
+
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temporary folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+    
+    toReturn = os.path.join(base_path, relative_path)
+    print(f"toReturn: {toReturn}")
+    return toReturn
 class DateApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -163,6 +178,8 @@ class CountdownPage(tk.Frame):
                 end = time.time() 
                 print(end - self.master.start)
 
+                audio_path = resource_path("assets/end_sfx.mp3")
+                play(audio_path, async_mode=True, loop=False)
     def play_pause(self):
         self.is_paused = not self.is_paused
         if not self.is_paused: 
