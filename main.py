@@ -34,9 +34,9 @@ class StartPage(tk.Frame):
         self.startBtnPressed = False
         self.startDateBtn = tk.Button(self, text="Start Date", command= lambda: self.open_calendar(startBtnPressed=True))
 
-        self.startDateBtn.grid(row=0, column=0, padx=10, pady=10)
+        self.startDateBtn.grid(row=0, column=0, padx=0, pady=10)
         self.endDateBtn = tk.Button(self, text="End Date",command= lambda: self.open_calendar(startBtnPressed=False))
-        self.endDateBtn.grid(row=0, column=1, padx=10, pady=10)
+        self.endDateBtn.grid(row=0, column=1, padx=0, pady=10)
 
         self.start_date = None
         self.end_date = None 
@@ -45,10 +45,14 @@ class StartPage(tk.Frame):
         self.duration_entry = tk.Entry(self)
         self.duration_entry.grid(row=2, column=1, padx=10, pady=10)
 
-        self.play_button = tk.Button(self, image= self.master.playBtn_Img, #text="Play", 
-                                     command=self.start_countdown)
+        self.play_button = tk.Button(self, text="Start counting down", command=self.start_countdown)
+        # self.play_button = tk.Button(self, image= self.master.playBtn_Img, command=self.start_countdown)
         self.play_button.config()
         self.play_button.grid(row=3, columnspan=2, pady=20)
+
+        self.error_label = tk.Label(self, text="", fg= "red") 
+
+        self.error_label.grid(row=4, column=0, padx= 10)
 
     def open_calendar(self, startBtnPressed:bool): 
         if(self.calendar_window is not None):
@@ -70,6 +74,8 @@ class StartPage(tk.Frame):
         self.calendar_window = None
         
     def update_button_text(self, selected_date:datetime):
+        # just replace time to 0
+        selected_date = selected_date.replace(minute =0, hour = 0, second = 0, microsecond=0)
         if self.startBtnPressed: 
             self.startDateBtn.config(text=selected_date.strftime("%Y-%m-%d"))
             self.start_date = selected_date
@@ -77,12 +83,36 @@ class StartPage(tk.Frame):
             self.endDateBtn.config(text=selected_date.strftime("%Y-%m-%d"))
             self.end_date = selected_date
 
+        if(self.start_date != None and self.end_date != None):
+            print(f"start date: {self.start_date}, end date: {self.end_date}")
+            print(f"start date > end_date: {self.start_date >= self.end_date}")
+
         self.on_closing()
 
+    def show_error_msg(self, msg:str):
+        self.error_label.config(text= msg)
    
-    def start_countdown(self):
+    def start_countdown(self): 
+        if(not self.start_date):
+            self.show_error_msg("Please specify start date")
+            return
+        if(not self.end_date):
+            self.show_error_msg("Please specify end date")
+            return
 
+        if(self.start_date >= self.end_date):
+            self.show_error_msg("Start date cannot be later or equals to End date")
+            return
+         
+        if(not self.duration_entry.get()):
+            self.show_error_msg("Please specify duration")
+            return
         
+        
+        # print(len(self.duration_entry.get()) == 0)
+        # print(not self.duration_entry.get())
+        # if(self.duration_entry.get()
+        # if(self.start_date > )
         self.master.start = time.time() 
         duration = int(self.duration_entry.get()) * 60  # Convert to seconds
         # print(f"start date {self.start_date}, end date {self.end_date}")
