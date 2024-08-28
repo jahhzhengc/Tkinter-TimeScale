@@ -8,8 +8,7 @@ class DateApp(tk.Tk):
         super().__init__()
         self.title("Date Countdown App")
         self.geometry("400x300")
-
-        self.playBtn_Img = tk.PhotoImage(file = "play.png")
+  
         # Start Page
         self.start = 0
         self.start_page = StartPage(self)
@@ -30,29 +29,34 @@ class StartPage(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         
+        # Variables
         self.calendar_window = None
-        self.startBtnPressed = False
-        self.startDateBtn = tk.Button(self, text="Start Date", command= lambda: self.open_calendar(startBtnPressed=True))
-
-        self.startDateBtn.grid(row=0, column=0, padx=0, pady=10)
-        self.endDateBtn = tk.Button(self, text="End Date",command= lambda: self.open_calendar(startBtnPressed=False))
-        self.endDateBtn.grid(row=0, column=1, padx=0, pady=10)
-
+        self.startBtnPressed = False # to identify if its start or end date
         self.start_date = None
         self.end_date = None 
 
-        tk.Label(self, text="Duration (minutes)").grid(row=2, column=0, padx=10, pady=10)
-        self.duration_entry = tk.Entry(self)
-        self.duration_entry.grid(row=2, column=1, padx=10, pady=10)
+        stack0 = tk.Frame(self)
+        stack0.pack(fill='x', padx=10,pady=20)
 
+        self.startDateBtn = tk.Button(stack0, text="Start Date", command= lambda: self.open_calendar(startBtnPressed=True))
+        self.startDateBtn.pack(side = tk.LEFT, anchor="w")
+        tk.Label(stack0, text= " ~ ").pack(side= tk.LEFT)
+        self.endDateBtn = tk.Button(stack0, text="End Date",command= lambda: self.open_calendar(startBtnPressed=False))
+        self.endDateBtn.pack(side = tk.LEFT, anchor="w")
+
+        stack1 = tk.Frame(self)
+        stack1.pack(fill ='x')
+
+        tk.Label(stack1, text="Duration (minutes)").pack(side= tk.LEFT, padx=10,pady=10)
+        self.duration_entry = tk.Entry(stack1)
+        self.duration_entry.pack(side= tk.LEFT, padx=10,pady=10)
+  
         self.play_button = tk.Button(self, text="Start counting down", command=self.start_countdown)
-        # self.play_button = tk.Button(self, image= self.master.playBtn_Img, command=self.start_countdown)
-        self.play_button.config()
-        self.play_button.grid(row=3, columnspan=2, pady=20)
+        self.play_button.config() 
+        self.play_button.pack(side= tk.TOP, padx=20, pady=20)
 
         self.error_label = tk.Label(self, text="", fg= "red") 
-
-        self.error_label.grid(row=4, column=0, padx= 10)
+        self.error_label.pack() 
 
     def open_calendar(self, startBtnPressed:bool): 
         if(self.calendar_window is not None):
@@ -82,11 +86,7 @@ class StartPage(tk.Frame):
         else:
             self.endDateBtn.config(text=selected_date.strftime("%Y-%m-%d"))
             self.end_date = selected_date
-
-        if(self.start_date != None and self.end_date != None):
-            print(f"start date: {self.start_date}, end date: {self.end_date}")
-            print(f"start date > end_date: {self.start_date >= self.end_date}")
-
+ 
         self.on_closing()
 
     def show_error_msg(self, msg:str):
@@ -96,6 +96,7 @@ class StartPage(tk.Frame):
         if(not self.start_date):
             self.show_error_msg("Please specify start date")
             return
+        
         if(not self.end_date):
             self.show_error_msg("Please specify end date")
             return
@@ -107,15 +108,9 @@ class StartPage(tk.Frame):
         if(not self.duration_entry.get()):
             self.show_error_msg("Please specify duration")
             return
-        
-        
-        # print(len(self.duration_entry.get()) == 0)
-        # print(not self.duration_entry.get())
-        # if(self.duration_entry.get()
-        # if(self.start_date > )
+         
         self.master.start = time.time() 
-        duration = int(self.duration_entry.get()) * 60  # Convert to seconds
-        # print(f"start date {self.start_date}, end date {self.end_date}")
+        duration = int(self.duration_entry.get()) * 60  # Convert to seconds 
         self.master.show_countdown_page(self.start_date, self.end_date, duration)
 
 
@@ -133,20 +128,19 @@ class CountdownPage(tk.Frame):
         self.elapsed_time = 0
         self.current_date = self.start_date
         self.seconds_per_day = self.duration / self.total_days
+ 
 
-        self.pauseBtn_Img = tk.PhotoImage(file ="pause.png")
-        self.restartBtn_Img = tk.PhotoImage(file ="restart.png")
-
-        self.date_label = tk.Label(self, text=self.current_date.strftime("%Y-%m-%d"), font=("Helvetica", 72))
+        self.date_label = tk.Label(self, text=self.current_date.strftime("%Y-%m-%d"), font=("Helvetica", 72), 
+                                   borderwidth = 2, relief ="groove")
         self.date_label.pack(pady=20)
 
         self.back_button = tk.Button(self, text="Back", command=self.master.show_start_page)
         self.back_button.pack(side=tk.LEFT, padx= 10)
 
-        self.play_pause_button = tk.Button(self, image = self.pauseBtn_Img, command=self.play_pause)
+        self.play_pause_button = tk.Button(self, text="Pause", command=self.play_pause)
         self.play_pause_button.pack(side=tk.LEFT, padx= 10)
 
-        self.restart_button = tk.Button(self,image=  self.restartBtn_Img, command=self.restart)
+        self.restart_button = tk.Button(self,text ="Restart", command=self.restart)
         self.restart_button.pack(side=tk.LEFT, padx= 10)
 
         self.update_date()
@@ -165,18 +159,17 @@ class CountdownPage(tk.Frame):
 
             if self.current_date < self.end_date:
                 self.after(1000, self.update_date)  
-            else: 
-                print("ITS OVER")
+            else:  
                 end = time.time() 
                 print(end - self.master.start)
 
     def play_pause(self):
         self.is_paused = not self.is_paused
         if not self.is_paused: 
-            self.play_pause_button.config(image = self.pauseBtn_Img)
+            self.play_pause_button.config(text ="Pause") 
             self.update_date()
-        else:
-            self.play_pause_button.config(image = self.master.playBtn_Img) 
+        else: 
+            self.play_pause_button.config(text="Play")
 
     def restart(self):
         self.current_date = self.start_date
