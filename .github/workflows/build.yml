@@ -23,8 +23,17 @@ jobs:
       - name: Install PyInstaller
         run: pip install pyinstaller
 
+      - name: Check Python Version
+        run: python --version
+
+      - name: Check PyInstaller Installation
+        run: pyinstaller --version
+
+      - name: List Directory Contents
+        run: ls -R
+ 
       - name: Build .exe
-        run:pyinstaller --onefile --windowed --add-data "assets/end_sfx.mp3;assets" main.py
+        run: pyinstaller --onefile --windowed --add-data "assets/end_sfx.mp3;assets" main.py
 
 
       - name: Upload Artifact
