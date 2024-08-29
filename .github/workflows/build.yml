@@ -24,7 +24,8 @@ jobs:
         run: pip install pyinstaller
 
       - name: Build .exe
-        run:pyinstaller --onefile --windowed --add-data "assets/end_sfx.mp3:assets" main.py
+        run:pyinstaller --onefile --windowed --add-data "assets/end_sfx.mp3;assets" main.py
+
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
